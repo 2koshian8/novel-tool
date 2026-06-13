@@ -344,6 +344,25 @@ console.log("キャプション保存テスト");
   updateCounts();
 });
 
+database
+  .ref("commonMemo")
+  .once("value")
+  .then(snapshot => {
+
+    const firebaseText = snapshot.val();
+
+    if (firebaseText) {
+
+      commonMemo.value = firebaseText;
+
+      localStorage.setItem(
+        "commonMemo",
+        firebaseText
+      );
+    }
+
+  });
+
 finalText.addEventListener("input", () => {
   localStorage.setItem(key("FinalText"), finalText.value);
 
@@ -359,12 +378,17 @@ finalText.addEventListener("input", () => {
 });
 
 commonMemo.addEventListener("input", () => {
+
   localStorage.setItem(
     "commonMemo",
     commonMemo.value
   );
-});
 
+  database.ref("commonMemo").set(
+    commonMemo.value
+  );
+
+});
 updateCounts();
 
 function copyText(textareaId) {
