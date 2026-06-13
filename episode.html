@@ -182,7 +182,17 @@ postDate.value = localStorage.getItem(key("PostDate")) || "";
 reserveDate.value = localStorage.getItem(key("ReserveDate")) || "";
 
 postDate.addEventListener("change", () => {
-  localStorage.setItem(key("PostDate"), postDate.value);
+
+  localStorage.setItem(
+    key("PostDate"),
+    postDate.value
+  );
+
+  saveToFirebase(
+    "PostDate",
+    postDate.value
+  );
+
 });
 
 reserveDate.addEventListener("change", () => {
@@ -341,6 +351,26 @@ database
       localStorage.setItem(
         "commonMemo",
         firebaseText
+      );
+
+    }
+
+  });
+
+database
+  .ref("episodes/" + episodeId + "/PostDate")
+  .once("value")
+  .then(snapshot => {
+
+    const firebaseDate = snapshot.val();
+
+    if (firebaseDate) {
+
+      postDate.value = firebaseDate;
+
+      localStorage.setItem(
+        key("PostDate"),
+        firebaseDate
       );
 
     }
