@@ -294,6 +294,8 @@ draftText.addEventListener("input", () => {
 
 cleanText.addEventListener("input", () => {
 
+ console.log("清書保存テスト");
+
   localStorage.setItem(
     key("CleanText"),
     cleanText.value
@@ -307,8 +309,36 @@ cleanText.addEventListener("input", () => {
   updateCounts();
 });
 
+database
+  .ref("episodes/" + episodeId + "/CaptionText")
+  .once("value")
+  .then(snapshot => {
+    const firebaseText = snapshot.val();
+
+    if (firebaseText) {
+      captionText.value = firebaseText;
+
+      localStorage.setItem(
+        key("CaptionText"),
+        firebaseText
+      );
+
+      updateCounts();
+    }
+  });
+
 captionText.addEventListener("input", () => {
-  localStorage.setItem(key("CaptionText"), captionText.value);
+
+  localStorage.setItem(
+    key("CaptionText"),
+    captionText.value
+  );
+
+  saveToFirebase(
+    "CaptionText",
+    captionText.value
+  );
+
   updateCounts();
 });
 
