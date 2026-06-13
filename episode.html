@@ -183,6 +183,8 @@ reserveDate.value = localStorage.getItem(key("ReserveDate")) || "";
 
 postDate.addEventListener("change", () => {
 
+console.log("投稿日保存");
+
   localStorage.setItem(
     key("PostDate"),
     postDate.value
