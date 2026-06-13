@@ -255,6 +255,25 @@ database
 
       updateCounts();
     }
+  });
+  database
+  .ref("episodes/" + episodeId + "/CleanText")
+  .once("value")
+  .then(snapshot => {
+
+    const firebaseText = snapshot.val();
+
+    if (firebaseText) {
+
+      cleanText.value = firebaseText;
+
+      localStorage.setItem(
+        key("CleanText"),
+        firebaseText
+      );
+
+      updateCounts();
+    }
 
   });
 
@@ -274,7 +293,17 @@ draftText.addEventListener("input", () => {
 });
 
 cleanText.addEventListener("input", () => {
-  localStorage.setItem(key("CleanText"), cleanText.value);
+
+  localStorage.setItem(
+    key("CleanText"),
+    cleanText.value
+  );
+
+  saveToFirebase(
+    "CleanText",
+    cleanText.value
+  );
+
   updateCounts();
 });
 
