@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>話数一覧</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>小説管理ツール</h1>
+<p>研究主任の初プログラム 🥵💕</p>
+
+<div class="card">
+  <a href="index.html">🏠 ホームへ戻る</a>
+
+  <h2>話数一覧</h2>
+ 
+  <div class="card">
+  <h3>📚 シリーズ総文字数</h3>
+  <p id="totalCount">0文字</p>
+</div>
+
+<div class="schedule-row">
+
+  <div class="schedule-box">
+    <div class="schedule-title">
+      📅 次回投稿
+    </div>
+
+   <div class="schedule-episode" id="nextPostEpisode">
+  XXV
+</div>
+
+    <div id="nextPostDays" class="schedule-days">
+      あと0日
+    </div>
+  </div>
+
+  <div class="schedule-box">
+    <div class="schedule-title">
+      📝 次回予約作業
+    </div>
+
+   <div class="schedule-episode" id="nextReserveEpisode">
+  XXVI
+</div>
+
+    <div id="nextReserveDays" class="schedule-days">
+      あと0日
+    </div>
+  </div>
+
+</div>
+
+<div class="stats-row">
+
+  <div class="stat-box">
+    <div class="stat-title">投稿済み</div>
+    <div class="stat-count" id="postedCount">0話</div>
+  </div>
+
+  <div class="stat-box">
+    <div class="stat-title">清書中</div>
+    <div class="stat-count" id="writingCount">0話</div>
+  </div>
+
+  <div class="stat-box">
+    <div class="stat-title">未着手</div>
+    <div class="stat-count" id="notyetCount">0話</div>
+  </div>
+
+</div>
+
+</div>
+ <div id="episodeList"></div>
+
+</div>
+<script src="episodes.js"></script>
+
+<script>
+const nextPostDate = new Date("2026-06-20");
+const today = new Date();
+
+const episodeList = document.getElementById("episodeList");
+
+let total = 0;
+let posted = 0;
+let writing = 0;
+let notyet = 0;
+
+episodes.forEach(episode => {
+  const finalText =
+    localStorage.getItem("episode" + episode.id + "FinalText") || "";
+
+  const pixiv =
+    localStorage.getItem("episode" + episode.id + "-pixiv");
+
+  const reserve =
+    localStorage.getItem("episode" + episode.id + "-reserve");
+
+  const textDone =
+    localStorage.getItem("episode" + episode.id + "-text");
+
+const postDate =
+  localStorage.getItem("episode" + episode.id + "PostDate")
+  || "";
+
+  let statusText = "未着手";
+  let statusClass = "not-started";
+  let statusData = "notyet";
+
+  if (pixiv === "true") {
+    statusText = "投稿済み";
+    statusClass = "posted";
+    statusData = "done";
+    posted++;
+  } else if (reserve === "true") {
+    statusText = "予約済み";
+    statusClass = "reserved";
+    statusData = "writing";
+    writing++;
+  } else if (textDone === "true") {
+    statusText = "清書済み";
+    statusClass = "clean";
+    statusData = "writing";
+    writing++;
+  } else {
+    notyet++;
+  }
+
+  total += finalText.length;
+
+  const card = document.createElement("a");
+  card.href = "episode.html?id=" + episode.id;
+  card.className = "story-card";
+  card.dataset.status = statusData;
+
+ card.innerHTML = `
+  <div class="story-card-header">
+    <h3>${episode.title}</h3>
+
+    <span class="status-badge ${statusClass}">
+      ${statusText}
+    </span>
+
+   <span class="post-date">
+  投稿日：${postDate || "未設定"}
+</span>
+
+  </div>
+
+  <p>${finalText.length}文字</p>
+`;
+
+  episodeList.appendChild(card);
+});
+
+document.getElementById("totalCount").textContent =
+  total.toLocaleString() + "文字";
+
+document.getElementById("postedCount").textContent = posted + "話";
+document.getElementById("writingCount").textContent = writing + "話";
+document.getElementById("notyetCount").textContent = notyet + "話";
+
+const diffDays = Math.ceil(
+  (nextPostDate - today) / (1000 * 60 * 60 * 24)
+);
+
+document.getElementById("nextPostDays").textContent =
+  "あと" + diffDays + "日";
+
+document.getElementById("nextReserveDays").textContent =
+  "あと" + diffDays + "日";
+
+let nextPost = null;
+let nextReserve = null;
+
+for (let i = 1; i <= episodes.length; i++) {
+
+  const isPosted =
+    localStorage.getItem("episode" + i + "-pixiv")
+    === "true";
+
+  if (!isPosted) {
+
+    nextPost = episodes[i - 1];
+
+    if (i < episodes.length) {
+      nextReserve = episodes[i];
+    }
+
+    break;
+  }
+}
+if (nextPost) {
+  document.getElementById("nextPostEpisode")
+    .textContent = nextPost.title;
+}
+
+if (nextReserve) {
+  document.getElementById("nextReserveEpisode")
+    .textContent = nextReserve.title;
+}
+
+
+
+</script>
+</body>
+</html>

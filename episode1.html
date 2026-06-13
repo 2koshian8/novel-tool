@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Ⅰ 赤と青の瞳</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>Ⅰ 赤と青の瞳</h1>
+
+<div class="card">
+  <h2>進捗</h2>
+
+  <p><input type="checkbox" id="episode1-cover"> 表紙完成</p>
+  <p><input type="checkbox" id="episode1-text"> 本文清書完了</p>
+  <p><input type="checkbox" id="episode1-reserve"> 予約投稿完了</p>
+  <p><input type="checkbox" id="episode1-pixiv"> Pixiv公開</p>
+</div>
+
+<div class="card">
+  <h2>画像</h2>
+
+  <div class="image-area">
+    <div class="image-box">表紙</div>
+    <div class="image-box">挿絵</div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>投稿日・予約日</h2>
+
+  <p>投稿日：<input type="date" id="episode1-post-date"></p>
+  <p>予約日：<input type="date" id="episode1-reserve-date"></p>
+</div>
+
+<div class="card">
+  <h2>肉付け</h2>
+  <p id="draftCount">文字数：0文字</p>
+  <textarea id="draftText" class="text-area" placeholder="肉付け前・下書き本文をここに貼る"></textarea>
+</div>
+
+<div class="card">
+  <h2>清書</h2>
+  <p id="cleanCount">文字数：0文字</p>
+  <textarea id="cleanText" class="text-area" placeholder="清書した本文をここに貼る"></textarea>
+</div>
+
+<div class="card">
+  <h2>最終</h2>
+  <p id="finalCount">文字数：0文字</p>
+  <textarea id="finalText" class="text-area" placeholder="完成した話を書く"></textarea>
+</div>
+<a href="story.html">📖 話数一覧へ戻る</a>
+
+<script>
+const cleanText = document.getElementById("cleanText");
+cleanText.value = localStorage.getItem("episode1CleanText") || "";
+cleanText.addEventListener("input", () => {
+  localStorage.setItem("episode1CleanText", cleanText.value);
+});
+
+const draftText = document.getElementById("draftText");
+draftText.value = localStorage.getItem("episode1DraftText") || "";
+draftText.addEventListener("input", () => {
+  localStorage.setItem("episode1DraftText", draftText.value);
+});
+
+const postDate = document.getElementById("episode1-post-date");
+postDate.value = localStorage.getItem("episode1PostDate") || "";
+postDate.addEventListener("change", () => {
+  localStorage.setItem("episode1PostDate", postDate.value);
+});
+
+const reserveDate = document.getElementById("episode1-reserve-date");
+reserveDate.value = localStorage.getItem("episode1ReserveDate") || "";
+reserveDate.addEventListener("change", () => {
+  localStorage.setItem("episode1ReserveDate", reserveDate.value);
+});
+
+const episodeChecks = document.querySelectorAll('input[type="checkbox"]');
+
+episodeChecks.forEach(check => {
+  const saved = localStorage.getItem(check.id);
+
+  if (saved === "true") {
+    check.checked = true;
+  }
+
+  check.addEventListener("change", () => {
+    localStorage.setItem(check.id, check.checked);
+  });
+});
+const draftCount =
+document.getElementById("draftCount");
+
+const cleanCount =
+document.getElementById("cleanCount");
+
+const finalText =
+document.getElementById("finalText");
+finalText.value = localStorage.getItem("episode1FinalText") || "";
+
+finalText.addEventListener("input", () => {
+  localStorage.setItem("episode1FinalText", finalText.value);
+  updateCounts();
+});
+
+const finalCount =
+document.getElementById("finalCount");
+
+function updateCounts() {
+
+  draftCount.textContent =
+    "文字数：" +
+    draftText.value.length +
+    "文字";
+
+  cleanCount.textContent =
+    "文字数：" +
+    cleanText.value.length +
+    "文字";
+
+  finalCount.textContent =
+    "文字数：" +
+    finalText.value.length +
+    "文字";
+}
+
+
+draftText.addEventListener(
+  "input",
+  updateCounts
+);
+
+cleanText.addEventListener(
+  "input",
+  updateCounts
+);
+
+updateCounts();
+</script>
+
+</body>
+</html>

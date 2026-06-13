@@ -1,0 +1,199 @@
+body {
+    background: #f3f3f3;
+    font-family: sans-serif;
+    margin: 0;
+    padding: 20px;
+}
+
+.card {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.cover-list {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.cover-card {
+    text-decoration: none;
+    color: black;
+    width: 180px;
+}
+
+.cover-image {
+    width: 180px;
+    height: 250px;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    background: #fafafa;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cover-card:hover {
+    transform: translateY(-5px);
+}
+.image-area {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.image-box {
+  width: 180px;
+  height: 240px;
+  border: 2px dashed #ccc;
+  border-radius: 12px;
+  background: #fafafa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+}
+
+.text-area {
+  width: 100%;
+  min-height: 250px;
+  padding: 12px;
+  box-sizing: border-box;
+}
+.story-card {
+  display: block;
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  text-decoration: none;
+  color: #222;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.story-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.story-card-header h3 {
+  margin: 0;
+}
+
+.status-badge {
+  margin-left: auto;
+}
+.post-date {
+  font-size: 14px;
+  color: #666;
+  white-space: nowrap;
+}
+
+.story-card-header h3 {
+  margin: 0;
+}
+
+.status-badge {
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.status-badge.posted {
+  background: #d4f8d4;
+  color: #1f7a1f;
+}
+
+.status-badge.writing {
+  background: #fff3c4;
+  color: #8a6500;
+}
+
+.status-badge.not-started {
+  background: #ffd6d6;
+  color: #a10000;
+}
+#totalCount {
+  font-size: 28px;
+  font-weight: bold;
+  color: #2c3e50;
+}
+.stats-row {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.stat-box {
+  flex: 1;
+  background: white;
+  border-radius: 12px;
+  padding: 15px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.stat-title {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.stat-count {
+  font-size: 24px;
+  font-weight: bold;
+}
+.schedule-row{
+  display:flex;
+  gap:15px;
+  margin-bottom:20px;
+}
+
+.schedule-box{
+  flex:1;
+  background:white;
+  border-radius:12px;
+  padding:20px;
+  text-align:center;
+  box-shadow:0 2px 8px rgba(0,0,0,0.08);
+}
+
+.schedule-title{
+  color:#666;
+  font-size:14px;
+  margin-bottom:10px;
+}
+
+.schedule-episode{
+  font-size:24px;
+  font-weight:bold;
+  margin-bottom:10px;
+}
+
+.schedule-days{
+  color:#2c3e50;
+  font-weight:bold;
+}
+.status-badge.reserved {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.status-badge.clean {
+  background: #e9d5ff;
+  color: #6b21a8;
+}
+
+.status-badge.cover {
+  background: #fce7f3;
+  color: #be185d;
+}
+.post-date{
+  font-size:14px;
+  color:#666;
+}

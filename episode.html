@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>話詳細</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1 id="episodeTitle">話タイトル</h1>
+
+<div class="card">
+  <h2>進捗</h2>
+
+  <p><input type="checkbox" id="coverCheck"> 表紙完成</p>
+  <p><input type="checkbox" id="textCheck"> 本文清書完了</p>
+  <p><input type="checkbox" id="reserveCheck"> 予約投稿完了</p>
+  <p><input type="checkbox" id="pixivCheck"> Pixiv公開</p>
+</div>
+
+<div class="card">
+  <h2>画像</h2>
+
+  <div class="image-area">
+    <div class="image-box">表紙</div>
+    <div class="image-box">挿絵</div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>投稿日・予約日</h2>
+
+  <p>投稿日：<input type="date" id="postDate"></p>
+  <p>予約日：<input type="date" id="reserveDate"></p>
+</div>
+
+<div class="card">
+  <h2>肉付け</h2>
+  <p id="draftCount">文字数：0文字</p>
+  <textarea id="draftText" class="text-area" placeholder="肉付け前・下書き本文をここに貼る"></textarea>
+</div>
+
+<div class="card">
+  <h2>清書</h2>
+  <p id="cleanCount">文字数：0文字</p>
+  <textarea id="cleanText" class="text-area" placeholder="清書した本文をここに貼る"></textarea>
+</div>
+
+<div class="card">
+  <h2>最終</h2>
+  <p id="finalCount">文字数：0文字</p>
+  <textarea id="finalText" class="text-area" placeholder="完成した話を書く"></textarea>
+</div>
+
+<a href="story.html">📖 話数一覧へ戻る</a>
+
+<script src="episodes.js"></script>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const episodeId = params.get("id") || "1";
+
+const episode = episodes.find(ep => ep.id == episodeId);
+
+document.getElementById("episodeTitle").textContent =
+  episode.title;
+
+function key(name) {
+  return "episode" + episodeId + name;
+}
+
+const coverCheck = document.getElementById("coverCheck");
+const textCheck = document.getElementById("textCheck");
+const reserveCheck = document.getElementById("reserveCheck");
+const pixivCheck = document.getElementById("pixivCheck");
+
+coverCheck.checked = localStorage.getItem(key("-cover")) === "true";
+textCheck.checked = localStorage.getItem(key("-text")) === "true";
+reserveCheck.checked = localStorage.getItem(key("-reserve")) === "true";
+pixivCheck.checked = localStorage.getItem(key("-pixiv")) === "true";
+
+coverCheck.addEventListener("change", () => {
+  localStorage.setItem(key("-cover"), coverCheck.checked);
+});
+
+textCheck.addEventListener("change", () => {
+  localStorage.setItem(key("-text"), textCheck.checked);
+});
+
+reserveCheck.addEventListener("change", () => {
+  localStorage.setItem(key("-reserve"), reserveCheck.checked);
+});
+
+pixivCheck.addEventListener("change", () => {
+  localStorage.setItem(key("-pixiv"), pixivCheck.checked);
+});
+
+const postDate = document.getElementById("postDate");
+const reserveDate = document.getElementById("reserveDate");
+
+postDate.value = localStorage.getItem(key("PostDate")) || "";
+reserveDate.value = localStorage.getItem(key("ReserveDate")) || "";
+
+postDate.addEventListener("change", () => {
+  localStorage.setItem(key("PostDate"), postDate.value);
+});
+
+reserveDate.addEventListener("change", () => {
+  localStorage.setItem(key("ReserveDate"), reserveDate.value);
+});
+
+const draftText = document.getElementById("draftText");
+const cleanText = document.getElementById("cleanText");
+const finalText = document.getElementById("finalText");
+
+draftText.value = localStorage.getItem(key("DraftText")) || "";
+cleanText.value = localStorage.getItem(key("CleanText")) || "";
+finalText.value = localStorage.getItem(key("FinalText")) || "";
+
+const draftCount = document.getElementById("draftCount");
+const cleanCount = document.getElementById("cleanCount");
+const finalCount = document.getElementById("finalCount");
+
+function updateCounts() {
+  draftCount.textContent = "文字数：" + draftText.value.length + "文字";
+  cleanCount.textContent = "文字数：" + cleanText.value.length + "文字";
+  finalCount.textContent = "文字数：" + finalText.value.length + "文字";
+}
+
+draftText.addEventListener("input", () => {
+  localStorage.setItem(key("DraftText"), draftText.value);
+  updateCounts();
+});
+
+cleanText.addEventListener("input", () => {
+  localStorage.setItem(key("CleanText"), cleanText.value);
+  updateCounts();
+});
+
+finalText.addEventListener("input", () => {
+  localStorage.setItem(key("FinalText"), finalText.value);
+  updateCounts();
+});
+
+updateCounts();
+</script>
+
+</body>
+</html>
