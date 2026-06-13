@@ -9,52 +9,122 @@
 
 <h1 id="episodeTitle">話タイトル</h1>
 
-<div class="card">
-  <h2>進捗</h2>
+<div class="top-row">
 
-  <p><input type="checkbox" id="coverCheck"> 表紙完成</p>
-  <p><input type="checkbox" id="textCheck"> 本文清書完了</p>
-  <p><input type="checkbox" id="reserveCheck"> 予約投稿完了</p>
-  <p><input type="checkbox" id="pixivCheck"> Pixiv公開</p>
-</div>
+<div class="card word-card">
+  <div class="word-label">
+    最終文字数
+  </div>
 
-<div class="card">
-  <h2>画像</h2>
-
-  <div class="image-area">
-    <div class="image-box">表紙</div>
-    <div class="image-box">挿絵</div>
+  <div id="finalWordCountBig">
+    0文字
   </div>
 </div>
-
-<div class="card">
-  <h2>投稿日・予約日</h2>
-
-  <p>投稿日：<input type="date" id="postDate"></p>
-  <p>予約日：<input type="date" id="reserveDate"></p>
+  
+  <div class="image-area">
+    <div class="image-box">
+  <img
+    id="coverImage"
+    class="detail-image"
+    alt="表紙"
+  >
 </div>
+    <div class="image-box">
+  <img
+  id="illustImage"
+  class="detail-image"
+  alt="挿絵"
+  onerror="this.src='covers/no-cover.png'"
+>
+</div>
+  </div>
+
+  <div class="side-column">
+
+    <div class="card progress-card">
+      <p><input type="checkbox" id="coverCheck"> 表紙完成</p>
+      <p><input type="checkbox" id="textCheck"> 本文清書完了</p>
+      <p><input type="checkbox" id="reserveCheck"> 予約投稿完了</p>
+      <p><input type="checkbox" id="pixivCheck"> Pixiv公開</p>
+    </div>
+
+    <div class="card date-card">
+      <p>投稿日：<input type="date" id="postDate"></p>
+      <p>予約日：<input type="date" id="reserveDate"></p>
+    </div>
+
+  </div>
+
+</div>
+
+
 
 <div class="card">
   <h2>肉付け</h2>
   <p id="draftCount">文字数：0文字</p>
+  <button onclick="copyText('draftText')">肉付けをコピー</button>
+  <input type="text" id="draftSearch" placeholder="肉付け内を検索">
+<button onclick="searchText('draftText', 'draftSearch')">検索</button>
+<p id="draftSearchResult"></p>
   <textarea id="draftText" class="text-area" placeholder="肉付け前・下書き本文をここに貼る"></textarea>
 </div>
 
 <div class="card">
   <h2>清書</h2>
   <p id="cleanCount">文字数：0文字</p>
+  <button onclick="copyText('cleanText')">清書をコピー</button>
+  <input type="text" id="cleanSearch" placeholder="清書内を検索">
+<button onclick="searchText('cleanText', 'cleanSearch')">検索</button>
+<p id="cleanSearchResult"></p>
   <textarea id="cleanText" class="text-area" placeholder="清書した本文をここに貼る"></textarea>
+</div>
+
+<div class="card">
+  <h2>共通メモ</h2>
+  <textarea id="commonMemo" class="text-area" placeholder="全話共通のメモを書く"></textarea>
+</div>
+
+<div class="card">
+  <h2>キャプション</h2>
+  <p id="captionCount">文字数：0文字</p>
+  <button onclick="copyText('captionText')">キャプションをコピー</button>
+  <input type="text" id="captionSearch" placeholder="キャプション内を検索">
+<button onclick="searchText('captionText', 'captionSearch')">検索</button>
+<p id="captionSearchResult"></p>
+  <textarea id="captionText" class="text-area" placeholder="Pixivのキャプションを書く"></textarea>
 </div>
 
 <div class="card">
   <h2>最終</h2>
   <p id="finalCount">文字数：0文字</p>
+  <button onclick="copyText('finalText')">最終をコピー</button>
+  <input type="text" id="finalSearch" placeholder="最終内を検索">
+<button onclick="searchText('finalText', 'finalSearch')">検索</button>
+<p id="finalSearchResult"></p>
   <textarea id="finalText" class="text-area" placeholder="完成した話を書く"></textarea>
 </div>
 
 <a href="story.html">📖 話数一覧へ戻る</a>
 
 <script src="episodes.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/12.14.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.14.0/firebase-database-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyAVWPJDnP0X2nPmbg9BxeV3WRZV1DGowZQ",
+  authDomain: "novel-tool-c135d.firebaseapp.com",
+  databaseURL: "https://novel-tool-c135d-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "novel-tool-c135d",
+  storageBucket: "novel-tool-c135d.firebasestorage.app",
+  messagingSenderId: "14513468450",
+  appId: "1:14513468450:web:c5bb27cf1e7a9faf02467b"
+};
+
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+</script>
 
 <script>
 const params = new URLSearchParams(window.location.search);
@@ -65,8 +135,18 @@ const episode = episodes.find(ep => ep.id == episodeId);
 document.getElementById("episodeTitle").textContent =
   episode.title;
 
+document.getElementById("coverImage").src =
+  "covers/cover" + episodeId + ".png";
+
+document.getElementById("illustImage").src =
+  "illusts/illust" + episodeId + ".png";
+
 function key(name) {
   return "episode" + episodeId + name;
+}
+
+function saveToFirebase(name, value) {
+  database.ref("episodes/" + episodeId + "/" + name).set(value);
 }
 
 const coverCheck = document.getElementById("coverCheck");
@@ -111,20 +191,31 @@ reserveDate.addEventListener("change", () => {
 
 const draftText = document.getElementById("draftText");
 const cleanText = document.getElementById("cleanText");
+const captionText = document.getElementById("captionText");
 const finalText = document.getElementById("finalText");
+
+const commonMemo = document.getElementById("commonMemo");
 
 draftText.value = localStorage.getItem(key("DraftText")) || "";
 cleanText.value = localStorage.getItem(key("CleanText")) || "";
+captionText.value = localStorage.getItem(key("CaptionText")) || "";
 finalText.value = localStorage.getItem(key("FinalText")) || "";
+commonMemo.value = localStorage.getItem("commonMemo") || "";
 
 const draftCount = document.getElementById("draftCount");
 const cleanCount = document.getElementById("cleanCount");
+const captionCount = document.getElementById("captionCount");
 const finalCount = document.getElementById("finalCount");
 
 function updateCounts() {
   draftCount.textContent = "文字数：" + draftText.value.length + "文字";
   cleanCount.textContent = "文字数：" + cleanText.value.length + "文字";
   finalCount.textContent = "文字数：" + finalText.value.length + "文字";
+document.getElementById("finalWordCountBig")
+  .textContent =
+  finalText.value.length.toLocaleString() + "文字";
+   captionCount.textContent =
+  "文字数：" + captionText.value.length + "文字";
 }
 
 draftText.addEventListener("input", () => {
@@ -137,12 +228,64 @@ cleanText.addEventListener("input", () => {
   updateCounts();
 });
 
-finalText.addEventListener("input", () => {
-  localStorage.setItem(key("FinalText"), finalText.value);
+captionText.addEventListener("input", () => {
+  localStorage.setItem(key("CaptionText"), captionText.value);
   updateCounts();
 });
 
+finalText.addEventListener("input", () => {
+  localStorage.setItem(key("FinalText"), finalText.value);
+
+  saveToFirebase(
+    "FinalText",
+    finalText.value
+  );
+
+  updateCounts();
+
+  console.log("Firebaseに保存した:", finalText.value);
+
+});
+
+commonMemo.addEventListener("input", () => {
+  localStorage.setItem(
+    "commonMemo",
+    commonMemo.value
+  );
+});
+
 updateCounts();
+
+function copyText(textareaId) {
+  const textarea = document.getElementById(textareaId);
+  navigator.clipboard.writeText(textarea.value);
+  alert("コピーしました！");
+}
+function searchText(textareaId, searchInputId) {
+  const textarea = document.getElementById(textareaId);
+  const searchInput = document.getElementById(searchInputId);
+  const keyword = searchInput.value;
+
+  const resultId = searchInputId.replace("Search", "SearchResult");
+  const result = document.getElementById(resultId);
+
+  if (keyword === "") {
+    result.textContent = "検索ワードを入力してね";
+    return;
+  }
+
+  const index = textarea.value.indexOf(keyword);
+
+  if (index === -1) {
+    result.textContent = "見つからなかった";
+  } else {
+    result.textContent = "見つかった！ " + (index + 1) + "文字目あたり";
+    textarea.focus();
+    textarea.setSelectionRange(index, index + keyword.length);
+  }
+}
+
+
 </script>
 
 </body>

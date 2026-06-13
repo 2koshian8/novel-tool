@@ -13,8 +13,32 @@
 <div class="card">
   <a href="index.html">🏠 ホームへ戻る</a>
 
-  <h2>話数一覧</h2>
+<h2>📚 ダッシュボード</h2>
  
+<div class="next-work-row">
+
+  <a id="nextDraftCard" class="next-work-card" href="#">
+    <div class="next-work-title">🔥 次の肉付け</div>
+    <div class="next-work-episode">未設定</div>
+  </a>
+
+  <a id="nextCleanCard" class="next-work-card" href="#">
+    <div class="next-work-title">✍️ 次の清書</div>
+    <div class="next-work-episode">未設定</div>
+  </a>
+
+  <a id="nextFinalCard" class="next-work-card" href="#">
+    <div class="next-work-title">✅ 次の最終確認</div>
+    <div class="next-work-episode">未設定</div>
+  </a>
+
+  <a id="nextCoverCard" class="next-work-card" href="#">
+  <div class="next-work-title">🎨 次の表紙</div>
+  <div class="next-work-episode">未設定</div>
+</a>
+
+</div>
+
   <div class="card">
   <h3>📚 シリーズ総文字数</h3>
   <p id="totalCount">0文字</p>
@@ -71,9 +95,22 @@
 
 </div>
 
+
+</div>
+<div class="card">
+
+  <h2 class="center-title">
+    📖 話数一覧
+  </h2>
+<div class="filter-row">
+  <button onclick="filterEpisodes('all')">全部</button>
+  <button onclick="filterEpisodes('done')">投稿済み</button>
+  <button onclick="filterEpisodes('writing')">清書中</button>
+  <button onclick="filterEpisodes('notyet')">未着手</button>
 </div>
  <div id="episodeList"></div>
 
+</div>
 </div>
 <script src="episodes.js"></script>
 
@@ -136,6 +173,13 @@ const postDate =
   card.dataset.status = statusData;
 
  card.innerHTML = `
+  <img
+  src="covers/cover${episode.id}.png"
+  class="cover-thumb"
+  alt="表紙"
+  onerror="this.src='covers/no-cover.png'"
+>
+
   <div class="story-card-header">
     <h3>${episode.title}</h3>
 
@@ -143,10 +187,9 @@ const postDate =
       ${statusText}
     </span>
 
-   <span class="post-date">
-  投稿日：${postDate || "未設定"}
-</span>
-
+    <span class="post-date">
+      投稿日：${postDate || "未設定"}
+    </span>
   </div>
 
   <p>${finalText.length}文字</p>
@@ -202,8 +245,80 @@ if (nextReserve) {
     .textContent = nextReserve.title;
 }
 
+function filterEpisodes(status) {
+  const cards = document.querySelectorAll(".story-card");
 
+  cards.forEach(card => {
+    if (status === "all" || card.dataset.status === status) {
+      card.style.display = "block";
+    } else {
+      card.style.display = "none";
+    }
+  });
+}
 
+let nextDraft = null;
+let nextClean = null;
+let nextFinal = null;
+
+episodes.forEach(episode => {
+  const draftText =
+    localStorage.getItem("episode" + episode.id + "DraftText") || "";
+
+  const cleanText =
+    localStorage.getItem("episode" + episode.id + "CleanText") || "";
+
+  const finalText =
+    localStorage.getItem("episode" + episode.id + "FinalText") || "";
+
+  const textDone =
+    localStorage.getItem("episode" + episode.id + "-text");
+
+  const pixiv =
+    localStorage.getItem("episode" + episode.id + "-pixiv");
+
+  if (!nextDraft && draftText.length === 0) {
+    nextDraft = episode;
+  }
+
+  if (!nextClean && draftText.length > 0 && cleanText.length === 0) {
+    nextClean = episode;
+  }
+
+  if (!nextFinal && cleanText.length > 0 && finalText.length === 0 && pixiv !== "true") {
+    nextFinal = episode;
+  }
+});
+
+function setNextWork(cardId, episode) {
+  const card = document.getElementById(cardId);
+  const title = card.querySelector(".next-work-episode");
+
+  if (episode) {
+    title.textContent = episode.title;
+    card.href = "episode.html?id=" + episode.id;
+  } else {
+    title.textContent = "なし";
+    card.href = "#";
+  }
+}
+
+setNextWork("nextDraftCard", nextDraft);
+setNextWork("nextCleanCard", nextClean);
+setNextWork("nextFinalCard", nextFinal);
+
+let nextCover = null;
+
+episodes.forEach(episode => {
+  const coverDone =
+    localStorage.getItem("episode" + episode.id + "-cover");
+
+  if (!nextCover && coverDone !== "true") {
+    nextCover = episode;
+  }
+});
+
+setNextWork("nextCoverCard", nextCover);
 </script>
 </body>
 </html>
