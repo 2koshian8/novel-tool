@@ -237,9 +237,39 @@ database
       console.log("Firebaseから読み込んだ:", firebaseText);
     }
   });
+  database
+  .ref("episodes/" + episodeId + "/DraftText")
+  .once("value")
+  .then(snapshot => {
+
+    const firebaseText = snapshot.val();
+
+    if (firebaseText) {
+
+      draftText.value = firebaseText;
+
+      localStorage.setItem(
+        key("DraftText"),
+        firebaseText
+      );
+
+      updateCounts();
+    }
+
+  });
 
 draftText.addEventListener("input", () => {
-  localStorage.setItem(key("DraftText"), draftText.value);
+
+  localStorage.setItem(
+    key("DraftText"),
+    draftText.value
+  );
+
+  saveToFirebase(
+    "DraftText",
+    draftText.value
+  );
+
   updateCounts();
 });
 
