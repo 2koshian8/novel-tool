@@ -218,6 +218,26 @@ document.getElementById("finalWordCountBig")
   "文字数：" + captionText.value.length + "文字";
 }
 
+database
+  .ref("episodes/" + episodeId + "/FinalText")
+  .once("value")
+  .then(snapshot => {
+    const firebaseText = snapshot.val();
+
+    if (firebaseText) {
+      finalText.value = firebaseText;
+
+      localStorage.setItem(
+        key("FinalText"),
+        firebaseText
+      );
+
+      updateCounts();
+
+      console.log("Firebaseから読み込んだ:", firebaseText);
+    }
+  });
+
 draftText.addEventListener("input", () => {
   localStorage.setItem(key("DraftText"), draftText.value);
   updateCounts();
