@@ -327,8 +327,6 @@ database
     }
   });
 
-captionText.addEventListener("input", () => {
-
 database
   .ref("commonMemo")
   .once("value")
@@ -348,6 +346,8 @@ database
     }
 
   });
+
+  captionText.addEventListener("input", () => {
 
 console.log("キャプション保存テスト");
 
