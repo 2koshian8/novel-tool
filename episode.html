@@ -329,6 +329,26 @@ database
 
 captionText.addEventListener("input", () => {
 
+database
+  .ref("commonMemo")
+  .once("value")
+  .then(snapshot => {
+
+    const firebaseText = snapshot.val();
+
+    if (firebaseText) {
+
+      commonMemo.value = firebaseText;
+
+      localStorage.setItem(
+        "commonMemo",
+        firebaseText
+      );
+
+    }
+
+  });
+
 console.log("キャプション保存テスト");
 
   localStorage.setItem(
@@ -360,9 +380,6 @@ finalText.addEventListener("input", () => {
 });
 
 commonMemo.addEventListener("input", () => {
-
-commonMemo.log("コメント保存テスト");
-
 
   localStorage.setItem(
     "commonMemo",
