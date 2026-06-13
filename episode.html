@@ -198,7 +198,17 @@ console.log("投稿日保存");
 });
 
 reserveDate.addEventListener("change", () => {
-  localStorage.setItem(key("ReserveDate"), reserveDate.value);
+
+  localStorage.setItem(
+    key("ReserveDate"),
+    reserveDate.value
+  );
+
+  saveToFirebase(
+    "ReserveDate",
+    reserveDate.value
+  );
+
 });
 
 const draftText = document.getElementById("draftText");
@@ -372,6 +382,26 @@ database
 
       localStorage.setItem(
         key("PostDate"),
+        firebaseDate
+      );
+
+    }
+
+  });
+
+  database
+  .ref("episodes/" + episodeId + "/ReserveDate")
+  .once("value")
+  .then(snapshot => {
+
+    const firebaseDate = snapshot.val();
+
+    if (firebaseDate) {
+
+      reserveDate.value = firebaseDate;
+
+      localStorage.setItem(
+        key("ReserveDate"),
         firebaseDate
       );
 
