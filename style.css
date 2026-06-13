@@ -287,15 +287,18 @@ body {
   justify-content:center;
   gap:20px;
 }
+
 .top-row{
   display:flex;
   justify-content:center;
   gap:20px;
   align-items:flex-start;
-  .progress-card{
+}
+
+.progress-card{
   width:250px;
 }
-}
+
 .side-column{
   display:flex;
   flex-direction:column;
