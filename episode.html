@@ -9,6 +9,12 @@
 
 <h1 id="episodeTitle">話タイトル</h1>
 
+<input
+  type="text"
+  id="episodeTitleInput"
+  placeholder="タイトルを入力"
+>
+
 <div class="top-row">
 
 <div class="card word-card">
@@ -27,6 +33,7 @@
     id="coverImage"
     class="detail-image"
     alt="表紙"
+    onerror="this.src='covers/no-cover.png'"
   >
 </div>
     <div class="image-box">
@@ -34,7 +41,7 @@
   id="illustImage"
   class="detail-image"
   alt="挿絵"
-  onerror="this.src='covers/no-cover.png'"
+  onerror="this.src='illusts/no-illust.png'"
 >
 </div>
   </div>
@@ -132,18 +139,56 @@ const episodeId = params.get("id") || "1";
 
 const episode = episodes.find(ep => ep.id == episodeId);
 
+function key(name) {
+  return "episode" + episodeId + name;
+}
+
 document.getElementById("episodeTitle").textContent =
-  episode.title;
+  episode?.title || "話タイトル";
+
+
+const titleInput =
+  document.getElementById(
+    "episodeTitleInput"
+  );
+
+titleInput.value =
+  localStorage.getItem(
+    key("Title")
+  ) || episode?.title || "";
+
+titleInput.addEventListener(
+  "input",
+  () => {
+
+    localStorage.setItem(
+      key("Title"),
+      titleInput.value
+    );
+
+    saveToFirebase(
+  "Title",
+  titleInput.value
+);
+
+    document.getElementById(
+      "episodeTitle"
+    ).textContent =
+      titleInput.value || "話タイトル";
+
+  }
+);
+
+document.getElementById(
+  "episodeTitle"
+).textContent =
+  titleInput.value || "話タイトル";
 
 document.getElementById("coverImage").src =
   "covers/cover" + episodeId + ".png";
 
 document.getElementById("illustImage").src =
   "illusts/illust" + episodeId + ".png";
-
-function key(name) {
-  return "episode" + episodeId + name;
-}
 
 function saveToFirebase(name, value) {
   database.ref("episodes/" + episodeId + "/" + name).set(value);
@@ -523,6 +568,29 @@ database
       localStorage.setItem(
         key("-pixiv"),
         firebaseCheck
+      );
+
+    }
+
+  });
+
+  database
+  .ref("episodes/" + episodeId + "/Title")
+  .once("value")
+  .then(snapshot => {
+
+    const firebaseTitle = snapshot.val();
+
+    if (firebaseTitle) {
+
+      titleInput.value = firebaseTitle;
+
+      document.getElementById("episodeTitle").textContent =
+        firebaseTitle;
+
+      localStorage.setItem(
+        key("Title"),
+        firebaseTitle
       );
 
     }

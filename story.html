@@ -102,6 +102,9 @@
   <h2 class="center-title">
     📖 話数一覧
   </h2>
+
+<button onclick="createNewEpisode()">＋ 新規作成</button>
+
 <div class="filter-row">
   <button onclick="filterEpisodes('all')">全部</button>
   <button onclick="filterEpisodes('done')">投稿済み</button>
@@ -114,6 +117,24 @@
 </div>
 <script src="episodes.js"></script>
 
+<script src="https://www.gstatic.com/firebasejs/12.14.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.14.0/firebase-database-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyAVWPJDnP0X2nPmbg9BxeV3WRZV1DGowZQ",
+  authDomain: "novel-tool-c135d.firebaseapp.com",
+  databaseURL: "https://novel-tool-c135d-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "novel-tool-c135d",
+  storageBucket: "novel-tool-c135d.firebasestorage.app",
+  messagingSenderId: "14513468450",
+  appId: "1:14513468450:web:c5bb27cf1e7a9faf02467b"
+};
+
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+</script>
+
 <script>
 const nextPostDate = new Date("2026-06-20");
 const today = new Date();
@@ -125,85 +146,135 @@ let posted = 0;
 let writing = 0;
 let notyet = 0;
 
-episodes.forEach(episode => {
-  const finalText =
-    localStorage.getItem("episode" + episode.id + "FinalText") || "";
+function renderEpisodes() {
+  episodeList.innerHTML = "";
 
-  const pixiv =
-    localStorage.getItem("episode" + episode.id + "-pixiv");
+  total = 0;
+  posted = 0;
+  writing = 0;
+  notyet = 0;
 
-  const reserve =
-    localStorage.getItem("episode" + episode.id + "-reserve");
+  episodes.forEach(episode => {
+    const firebaseTitle =
+      localStorage.getItem("episode" + episode.id + "Title");
 
-  const textDone =
-    localStorage.getItem("episode" + episode.id + "-text");
+    if (firebaseTitle) {
+      episode.title = firebaseTitle;
+    }
 
-const postDate =
-  localStorage.getItem("episode" + episode.id + "PostDate")
-  || "";
+    const finalText =
+      localStorage.getItem("episode" + episode.id + "FinalText") || "";
 
-  let statusText = "未着手";
-  let statusClass = "not-started";
-  let statusData = "notyet";
+    const pixiv =
+      localStorage.getItem("episode" + episode.id + "-pixiv");
 
-  if (pixiv === "true") {
-    statusText = "投稿済み";
-    statusClass = "posted";
-    statusData = "done";
-    posted++;
-  } else if (reserve === "true") {
-    statusText = "予約済み";
-    statusClass = "reserved";
-    statusData = "writing";
-    writing++;
-  } else if (textDone === "true") {
-    statusText = "清書済み";
-    statusClass = "clean";
-    statusData = "writing";
-    writing++;
-  } else {
-    notyet++;
-  }
+    const reserve =
+      localStorage.getItem("episode" + episode.id + "-reserve");
 
-  total += finalText.length;
+    const textDone =
+      localStorage.getItem("episode" + episode.id + "-text");
 
-  const card = document.createElement("a");
-  card.href = "episode.html?id=" + episode.id;
-  card.className = "story-card";
-  card.dataset.status = statusData;
+    const postDate =
+      localStorage.getItem("episode" + episode.id + "PostDate") || "";
 
- card.innerHTML = `
-  <img
-  src="covers/cover${episode.id}.png"
-  class="cover-thumb"
-  alt="表紙"
-  onerror="this.src='covers/no-cover.png'"
->
+    let statusText = "未着手";
+    let statusClass = "not-started";
+    let statusData = "notyet";
 
-  <div class="story-card-header">
-    <h3>${episode.title}</h3>
+    if (pixiv === "true") {
+      statusText = "投稿済み";
+      statusClass = "posted";
+      statusData = "done";
+      posted++;
+    } else if (reserve === "true") {
+      statusText = "予約済み";
+      statusClass = "reserved";
+      statusData = "writing";
+      writing++;
+    } else if (textDone === "true") {
+      statusText = "清書済み";
+      statusClass = "clean";
+      statusData = "writing";
+      writing++;
+    } else {
+      notyet++;
+    }
 
-    <span class="status-badge ${statusClass}">
-      ${statusText}
-    </span>
+    total += finalText.length;
 
-    <span class="post-date">
-      投稿日：${postDate || "未設定"}
-    </span>
-  </div>
+    const card = document.createElement("a");
+    card.href = "episode.html?id=" + episode.id;
+    card.className = "story-card";
+    card.dataset.status = statusData;
 
-  <p>${finalText.length}文字</p>
-`;
+    card.innerHTML = `
+      <img
+        src="covers/cover${episode.id}.png"
+        class="cover-thumb"
+        alt="表紙"
+        onerror="this.src='covers/no-cover.png'"
+      >
 
-  episodeList.appendChild(card);
-});
+      <div class="story-card-header">
+        <h3>${episode.title}</h3>
 
-document.getElementById("totalCount").textContent =
-  total.toLocaleString() + "文字";
+        <span class="status-badge ${statusClass}">
+          ${statusText}
+        </span>
 
-document.getElementById("postedCount").textContent = posted + "話";
-document.getElementById("writingCount").textContent = writing + "話";
-document.getElementById("notyetCount").textContent = notyet + "話";
+        <span class="post-date">
+          投稿日：${postDate || "未設定"}
+        </span>
+      </div>
+
+      <p>${finalText.length}文字</p>
+    `;
+
+    episodeList.appendChild(card);
+  });
+
+  document.getElementById("totalCount").textContent =
+    total.toLocaleString() + "文字";
+
+  document.getElementById("postedCount").textContent = posted + "話";
+  document.getElementById("writingCount").textContent = writing + "話";
+  document.getElementById("notyetCount").textContent = notyet + "話";
+}
+
+database
+  .ref("episodes")
+  .once("value")
+  .then(snapshot => {
+    const firebaseEpisodes = snapshot.val();
+
+    if (firebaseEpisodes) {
+      Object.keys(firebaseEpisodes).forEach(id => {
+        const data = firebaseEpisodes[id];
+
+        const exists = episodes.some(
+          episode => episode.id == id
+        );
+
+        if (!exists && data.Title) {
+          episodes.push({
+            id: Number(id),
+            title: data.Title
+          });
+        }
+
+        if (data.Title) {
+          localStorage.setItem(
+            "episode" + id + "Title",
+            data.Title
+          );
+        }
+      });
+    }
+
+    episodes.sort((a, b) => a.id - b.id);
+
+    renderEpisodes();
+  });
 
 const diffDays = Math.ceil(
   (nextPostDate - today) / (1000 * 60 * 60 * 24)
@@ -319,6 +390,25 @@ episodes.forEach(episode => {
 });
 
 setNextWork("nextCoverCard", nextCover);
+
+function createNewEpisode() {
+  const mainEpisodes = episodes.filter(
+    episode => episode.id < 100
+  );
+
+  const nextId =
+    Math.max(
+      ...mainEpisodes.map(
+        episode => episode.id
+      )
+    ) + 1;
+
+  console.log("新規作成ID:", nextId);
+
+  location.href =
+    "episode.html?id=" + nextId;
+}
+
 </script>
 </body>
 </html>
