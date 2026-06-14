@@ -188,7 +188,17 @@ textCheck.addEventListener("change", () => {
 });
 
 reserveCheck.addEventListener("change", () => {
-  localStorage.setItem(key("-reserve"), reserveCheck.checked);
+
+  localStorage.setItem(
+    key("-reserve"),
+    reserveCheck.checked
+  );
+
+  saveToFirebase(
+    "ReserveCheck",
+    reserveCheck.checked
+  );
+
 });
 
 pixivCheck.addEventListener("change", () => {
@@ -462,6 +472,26 @@ database
 
       localStorage.setItem(
         key("-text"),
+        firebaseCheck
+      );
+
+    }
+
+  });
+
+database
+  .ref("episodes/" + episodeId + "/ReserveCheck")
+  .once("value")
+  .then(snapshot => {
+
+    const firebaseCheck = snapshot.val();
+
+    if (firebaseCheck !== null) {
+
+      reserveCheck.checked = firebaseCheck;
+
+      localStorage.setItem(
+        key("-reserve"),
         firebaseCheck
       );
 
