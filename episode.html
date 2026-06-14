@@ -160,7 +160,17 @@ reserveCheck.checked = localStorage.getItem(key("-reserve")) === "true";
 pixivCheck.checked = localStorage.getItem(key("-pixiv")) === "true";
 
 coverCheck.addEventListener("change", () => {
-  localStorage.setItem(key("-cover"), coverCheck.checked);
+
+  localStorage.setItem(
+    key("-cover"),
+    coverCheck.checked
+  );
+
+  saveToFirebase(
+    "CoverCheck",
+    coverCheck.checked
+  );
+
 });
 
 textCheck.addEventListener("change", () => {
@@ -403,6 +413,26 @@ database
       localStorage.setItem(
         key("ReserveDate"),
         firebaseDate
+      );
+
+    }
+
+  });
+
+database
+  .ref("episodes/" + episodeId + "/CoverCheck")
+  .once("value")
+  .then(snapshot => {
+
+    const firebaseCheck = snapshot.val();
+
+    if (firebaseCheck !== null) {
+
+      coverCheck.checked = firebaseCheck;
+
+      localStorage.setItem(
+        key("-cover"),
+        firebaseCheck
       );
 
     }
