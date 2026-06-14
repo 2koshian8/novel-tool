@@ -202,7 +202,17 @@ reserveCheck.addEventListener("change", () => {
 });
 
 pixivCheck.addEventListener("change", () => {
-  localStorage.setItem(key("-pixiv"), pixivCheck.checked);
+
+  localStorage.setItem(
+    key("-pixiv"),
+    pixivCheck.checked
+  );
+
+  saveToFirebase(
+    "PixivCheck",
+    pixivCheck.checked
+  );
+
 });
 
 const postDate = document.getElementById("postDate");
@@ -492,6 +502,26 @@ database
 
       localStorage.setItem(
         key("-reserve"),
+        firebaseCheck
+      );
+
+    }
+
+  });
+
+database
+  .ref("episodes/" + episodeId + "/PixivCheck")
+  .once("value")
+  .then(snapshot => {
+
+    const firebaseCheck = snapshot.val();
+
+    if (firebaseCheck !== null) {
+
+      pixivCheck.checked = firebaseCheck;
+
+      localStorage.setItem(
+        key("-pixiv"),
         firebaseCheck
       );
 
