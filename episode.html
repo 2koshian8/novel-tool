@@ -174,7 +174,17 @@ coverCheck.addEventListener("change", () => {
 });
 
 textCheck.addEventListener("change", () => {
-  localStorage.setItem(key("-text"), textCheck.checked);
+
+  localStorage.setItem(
+    key("-text"),
+    textCheck.checked
+  );
+
+  saveToFirebase(
+    "TextCheck",
+    textCheck.checked
+  );
+
 });
 
 reserveCheck.addEventListener("change", () => {
@@ -432,6 +442,26 @@ database
 
       localStorage.setItem(
         key("-cover"),
+        firebaseCheck
+      );
+
+    }
+
+  });
+
+database
+  .ref("episodes/" + episodeId + "/TextCheck")
+  .once("value")
+  .then(snapshot => {
+
+    const firebaseCheck = snapshot.val();
+
+    if (firebaseCheck !== null) {
+
+      textCheck.checked = firebaseCheck;
+
+      localStorage.setItem(
+        key("-text"),
         firebaseCheck
       );
 
