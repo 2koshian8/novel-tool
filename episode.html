@@ -80,6 +80,9 @@
   <h2>肉付け</h2>
   <p id="draftCount">文字数：0文字</p>
   <button onclick="copyText('draftText')">肉付けをコピー</button>
+  <button onclick="openModal('draftText', '肉付け')">
+  大きく編集
+</button>
   <input type="text" id="draftSearch" placeholder="肉付け内を検索">
 <button onclick="searchText('draftText', 'draftSearch')">検索</button>
 <p id="draftSearchResult"></p>
@@ -90,6 +93,9 @@
   <h2>清書</h2>
   <p id="cleanCount">文字数：0文字</p>
   <button onclick="copyText('cleanText')">清書をコピー</button>
+  <button onclick="openModal('cleanText', '清書')">
+  大きく編集
+</button>
   <input type="text" id="cleanSearch" placeholder="清書内を検索">
 <button onclick="searchText('cleanText', 'cleanSearch')">検索</button>
 <p id="cleanSearchResult"></p>
@@ -105,6 +111,9 @@
   <h2>キャプション</h2>
   <p id="captionCount">文字数：0文字</p>
   <button onclick="copyText('captionText')">キャプションをコピー</button>
+  <button onclick="openModal('captionText', 'キャプション')">
+  大きく編集
+</button>
   <input type="text" id="captionSearch" placeholder="キャプション内を検索">
 <button onclick="searchText('captionText', 'captionSearch')">検索</button>
 <p id="captionSearchResult"></p>
