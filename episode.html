@@ -25,6 +25,13 @@
   最終保存：未保存
 </p>
 
+<button
+  id="previewLink"
+  onclick="location.href='preview.html?id=' + episodeId"
+>
+  👀 プレビュー
+</button>
+
 <div class="top-row">
 
 <div class="card word-card">
@@ -80,6 +87,9 @@
   <h2>肉付け</h2>
   <p id="draftCount">文字数：0文字</p>
   <button onclick="copyText('draftText')">肉付けをコピー</button>
+  <button onclick="openModal('draftText', '肉付け')">
+  大きく編集
+</button>
   <input type="text" id="draftSearch" placeholder="肉付け内を検索">
 <button onclick="searchText('draftText', 'draftSearch')">検索</button>
 <p id="draftSearchResult"></p>
@@ -90,6 +100,9 @@
   <h2>清書</h2>
   <p id="cleanCount">文字数：0文字</p>
   <button onclick="copyText('cleanText')">清書をコピー</button>
+  <button onclick="openModal('cleanText', '清書')">
+  大きく編集
+</button>
   <input type="text" id="cleanSearch" placeholder="清書内を検索">
 <button onclick="searchText('cleanText', 'cleanSearch')">検索</button>
 <p id="cleanSearchResult"></p>
@@ -105,6 +118,9 @@
   <h2>キャプション</h2>
   <p id="captionCount">文字数：0文字</p>
   <button onclick="copyText('captionText')">キャプションをコピー</button>
+  <button onclick="openModal('captionText', 'キャプション')">
+  大きく編集
+</button>
   <input type="text" id="captionSearch" placeholder="キャプション内を検索">
 <button onclick="searchText('captionText', 'captionSearch')">検索</button>
 <p id="captionSearchResult"></p>
@@ -115,6 +131,9 @@
   <h2>最終</h2>
   <p id="finalCount">文字数：0文字</p>
   <button onclick="copyText('finalText')">最終をコピー</button>
+  <button onclick="openModal('finalText', '最終')">
+    大きく編集
+  </button>
   <input type="text" id="finalSearch" placeholder="最終内を検索">
 <button onclick="searchText('finalText', 'finalSearch')">検索</button>
 <p id="finalSearchResult"></p>
@@ -122,6 +141,20 @@
 </div>
 
 <a href="story.html">📖 話数一覧へ戻る</a>
+
+<div id="textModal" class="modal">
+  <div class="modal-content">
+    <h2 id="modalTitle">入力</h2>
+
+    <textarea id="modalTextarea"></textarea>
+
+    <button onclick="closeModal()">
+      閉じる
+    </button>
+  </div>
+</div>
+
+<script src="episodes.js"></script>
 
 <script src="episodes.js"></script>
 
@@ -708,6 +741,36 @@ function saveAllData() {
 
 }
 
+let currentTextarea = null;
+
+function openModal(textareaId, title) {
+  currentTextarea =
+    document.getElementById(textareaId);
+
+  document.getElementById("modalTitle").textContent =
+    title;
+
+  document.getElementById("modalTextarea").value =
+    currentTextarea.value;
+
+  document.getElementById("textModal").style.display =
+    "block";
+}
+
+function closeModal() {
+  if (currentTextarea) {
+    currentTextarea.value =
+      document.getElementById("modalTextarea").value;
+
+    currentTextarea.dispatchEvent(
+      new Event("input")
+    );
+  }
+
+  document.getElementById("textModal").style.display =
+    "none";
+}
+
 function copyText(textareaId) {
   const textarea = document.getElementById(textareaId);
   navigator.clipboard.writeText(textarea.value);
@@ -736,6 +799,7 @@ function searchText(textareaId, searchInputId) {
     textarea.setSelectionRange(index, index + keyword.length);
   }
 }
+
 
 
 </script>

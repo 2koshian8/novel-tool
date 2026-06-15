@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>プレビュー</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="card">
+
+<h1 id="previewTitle">
+タイトル
+</h1>
+
+<img
+  id="previewCover"
+  class="detail-image"
+  alt="表紙"
+>
+
+<h2>キャプション</h2>
+
+<div id="previewCaption"></div>
+
+<h2>本文</h2>
+
+<div id="previewText"></div>
+
+<img
+  id="previewIllust"
+  class="detail-image"
+  alt="挿絵"
+>
+
+<br><br>
+
+<a href="javascript:history.back()">
+⬅ 編集画面へ戻る
+</a>
+
+</div>
+
+<script src="episodes.js"></script>
+
+<script>
+
+const params =
+  new URLSearchParams(
+    window.location.search
+  );
+
+const episodeId =
+  params.get("id") || "1";
+
+document.getElementById(
+  "previewCover"
+).src =
+  "covers/cover" +
+  episodeId +
+  ".png";
+
+document.getElementById(
+  "previewIllust"
+).src =
+  "illusts/illust" +
+  episodeId +
+  ".png";
+
+document.getElementById(
+  "previewTitle"
+).textContent =
+  localStorage.getItem(
+    "episode" +
+    episodeId +
+    "Title"
+  ) || "タイトル";
+
+document.getElementById(
+  "previewCaption"
+).innerText =
+  localStorage.getItem(
+    "episode" +
+    episodeId +
+    "CaptionText"
+  ) || "";
+
+document.getElementById(
+  "previewText"
+).innerText =
+  localStorage.getItem(
+    "episode" +
+    episodeId +
+    "FinalText"
+  ) || "";
+
+</script>
+
+</body>
+</html>
