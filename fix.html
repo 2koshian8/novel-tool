@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>話数ずれ修正</title>
+</head>
+<body>
+
+<h1>話数ずれ修正ツール</h1>
+
+<p>
+25〜69を1つ後ろへずらします。<br>
+25は空になります。
+</p>
+
+<button onclick="fixEpisodeNumbers()">
+  🔧 修正を実行する
+</button>
+
+<p id="result"></p>
+
+<script src="https://www.gstatic.com/firebasejs/12.14.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/12.14.0/firebase-database-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyAVWPJDnP0X2nPmbg9BxeV3WRZV1DGowZQ",
+  authDomain: "novel-tool-c135d.firebaseapp.com",
+  databaseURL: "https://novel-tool-c135d-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "novel-tool-c135d",
+  storageBucket: "novel-tool-c135d.firebasestorage.app",
+  messagingSenderId: "14513468450",
+  appId: "1:14513468450:web:c5bb27cf1e7a9faf02467b"
+};
+
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+
+function fixEpisodeNumbers() {
+  if (!confirm("本当に25〜69を1つ後ろへずらしますか？")) {
+    return;
+  }
+
+  database.ref("episodes").once("value").then(snapshot => {
+    const episodes = snapshot.val();
+
+    if (!episodes) {
+      document.getElementById("result").textContent =
+        "episodes が見つかりません";
+      return;
+    }
+
+    const updates = {};
+
+    const backupKey =
+      "episodes_backup_" + new Date().getTime();
+
+    updates[backupKey] = episodes;
+
+    for (let i = 69; i >= 25; i--) {
+      if (episodes[i]) {
+        updates["episodes/" + (i + 1)] = episodes[i];
+      }
+    }
+
+    updates["episodes/25"] = null;
+
+    database.ref().update(updates).then(() => {
+      document.getElementById("result").textContent =
+        "修正完了！25が空になって、26以降が1つ後ろにずれました。";
+    });
+  });
+}
+</script>
+
+</body>
+</html>
