@@ -15,6 +15,16 @@
   placeholder="タイトルを入力"
 >
 
+<button onclick="saveAllData()">
+  💾 保存する
+</button>
+
+<p id="saveMessage"></p>
+
+<p id="lastSavedText">
+  最終保存：未保存
+</p>
+
 <div class="top-row">
 
 <div class="card word-card">
@@ -193,6 +203,8 @@ document.getElementById("illustImage").src =
 function saveToFirebase(name, value) {
   database.ref("episodes/" + episodeId + "/" + name).set(value);
 }
+
+
 
 const coverCheck = document.getElementById("coverCheck");
 const textCheck = document.getElementById("textCheck");
@@ -642,6 +654,59 @@ commonMemo.addEventListener("input", () => {
 
 });
 updateCounts();
+
+const lastSavedText =
+  document.getElementById(
+    "lastSavedText"
+  );
+
+const savedTime =
+  localStorage.getItem(
+    key("LastSaved")
+  );
+
+if (savedTime) {
+  lastSavedText.textContent =
+    "最終保存：" + savedTime;
+}
+
+function saveAllData() {
+
+  const now = new Date();
+
+  const savedText =
+    now.getFullYear() + "/" +
+    String(now.getMonth() + 1).padStart(2, "0") + "/" +
+    String(now.getDate()).padStart(2, "0") + " " +
+    String(now.getHours()).padStart(2, "0") + ":" +
+    String(now.getMinutes()).padStart(2, "0");
+
+  localStorage.setItem(
+    key("LastSaved"),
+    savedText
+  );
+
+  saveToFirebase(
+    "LastSaved",
+    savedText
+  );
+
+  lastSavedText.textContent =
+    "最終保存：" + savedText;
+
+  const saveMessage =
+    document.getElementById(
+      "saveMessage"
+    );
+
+  saveMessage.textContent =
+    "✅ 保存しました！";
+
+  setTimeout(() => {
+    saveMessage.textContent = "";
+  }, 3000);
+
+}
 
 function copyText(textareaId) {
   const textarea = document.getElementById(textareaId);
