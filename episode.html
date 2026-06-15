@@ -115,6 +115,9 @@
   <h2>最終</h2>
   <p id="finalCount">文字数：0文字</p>
   <button onclick="copyText('finalText')">最終をコピー</button>
+  <button onclick="openModal('finalText', '最終')">
+    大きく編集
+  </button>
   <input type="text" id="finalSearch" placeholder="最終内を検索">
 <button onclick="searchText('finalText', 'finalSearch')">検索</button>
 <p id="finalSearchResult"></p>
@@ -122,6 +125,20 @@
 </div>
 
 <a href="story.html">📖 話数一覧へ戻る</a>
+
+<div id="textModal" class="modal">
+  <div class="modal-content">
+    <h2 id="modalTitle">入力</h2>
+
+    <textarea id="modalTextarea"></textarea>
+
+    <button onclick="closeModal()">
+      閉じる
+    </button>
+  </div>
+</div>
+
+<script src="episodes.js"></script>
 
 <script src="episodes.js"></script>
 
@@ -708,6 +725,36 @@ function saveAllData() {
 
 }
 
+let currentTextarea = null;
+
+function openModal(textareaId, title) {
+  currentTextarea =
+    document.getElementById(textareaId);
+
+  document.getElementById("modalTitle").textContent =
+    title;
+
+  document.getElementById("modalTextarea").value =
+    currentTextarea.value;
+
+  document.getElementById("textModal").style.display =
+    "block";
+}
+
+function closeModal() {
+  if (currentTextarea) {
+    currentTextarea.value =
+      document.getElementById("modalTextarea").value;
+
+    currentTextarea.dispatchEvent(
+      new Event("input")
+    );
+  }
+
+  document.getElementById("textModal").style.display =
+    "none";
+}
+
 function copyText(textareaId) {
   const textarea = document.getElementById(textareaId);
   navigator.clipboard.writeText(textarea.value);
@@ -736,6 +783,7 @@ function searchText(textareaId, searchInputId) {
     textarea.setSelectionRange(index, index + keyword.length);
   }
 }
+
 
 
 </script>
