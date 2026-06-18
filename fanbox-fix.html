@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>FANBOX番外編移行ツール</title>
+</head>
+<body>
+
+<h1>FANBOX番外編移行ツール</h1>
+
+<button onclick="moveEpisodes()">
+🌸 番外編を100番台へ移動
+</button>
+
+<p id="result"></p>
+
+<script src="https://www.gstatic.com/firebasejs/12.14.0/firebase-app-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/12.14.0/firebase-database-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyAVWPJDnP0X2nPmbg9BxeV3WRZV1DGowZQ",
+  authDomain: "novel-tool-c135d.firebaseapp.com",
+  databaseURL: "https://novel-tool-c135d-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "novel-tool-c135d",
+  storageBucket: "novel-tool-c135d.firebasestorage.app",
+  messagingSenderId: "14513468450",
+  appId: "1:14513468450:web:c5bb27cf1e7a9faf02467b"
+};
+
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+
+async function moveEpisodes() {
+
+  if (!confirm("番外編を100番台へ移動しますか？")) {
+    return;
+  }
+
+  const snapshot =
+    await database.ref("episodes").once("value");
+
+  const episodes = snapshot.val();
+
+  const updates = {};
+
+  updates["episodes/101"] = episodes["39"];
+  updates["episodes/102"] = episodes["48"];
+  updates["episodes/103"] = episodes["55"];
+  updates["episodes/104"] = episodes["56"];
+
+  updates["episodes/39"] = null;
+  updates["episodes/48"] = null;
+  updates["episodes/55"] = null;
+  updates["episodes/56"] = null;
+
+  await database.ref().update(updates);
+
+  document.getElementById("result").textContent =
+    "移行完了！";
+}
+</script>
+
+</body>
+</html>
