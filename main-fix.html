@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>本編話数詰め直しツール</title>
+</head>
+<body>
+
+<h1>本編話数詰め直しツール</h1>
+
+<p>
+番外編として移動した 39 / 48 / 55 / 56 を抜いて、<br>
+本編を前に詰め直します。
+</p>
+
+<button onclick="fixMainEpisodes()">
+本編を詰め直す
+</button>
+
+<p id="result"></p>
+
+<script src="https://www.gstatic.com/firebasejs/12.14.0/firebase-app-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/12.14.0/firebase-database-compat.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyAVWPJDnP0X2nPmbg9BxeV3WRZV1DGowZQ",
+  authDomain: "novel-tool-c135d.firebaseapp.com",
+  databaseURL: "https://novel-tool-c135d-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "novel-tool-c135d",
+  storageBucket: "novel-tool-c135d.firebasestorage.app",
+  messagingSenderId: "14513468450",
+  appId: "1:14513468450:web:c5bb27cf1e7a9faf02467b"
+};
+
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+
+async function fixMainEpisodes() {
+  if (!confirm("本当に本編を詰め直しますか？")) {
+    return;
+  }
+
+  const snapshot =
+    await database.ref("episodes").once("value");
+
+  const episodes = snapshot.val();
+
+  if (!episodes) {
+    document.getElementById("result").textContent =
+      "episodes が見つかりません";
+    return;
+  }
+
+  const backupKey =
+    "episodes_backup_main_fix_" + new Date().getTime();
+
+  const updates = {};
+
+  updates[backupKey] = episodes;
+
+  const removedNumbers = [39, 48, 55, 56];
+
+  const mainNumbers = Object.keys(episodes)
+    .map(Number)
+    .filter(number =>
+      number >= 39 &&
+      number < 100 &&
+      !removedNumbers.includes(number)
+    )
+    .sort((a, b) => a - b);
+
+  let targetNumber = 39;
+
+  mainNumbers.forEach(sourceNumber => {
+    updates["episodes/" + targetNumber] =
+      episodes[sourceNumber];
+
+    targetNumber++;
+  });
+
+  for (let number = targetNumber; number < 100; number++) {
+    if (episodes[number]) {
+      updates["episodes/" + number] = null;
+    }
+  }
+
+  await database.ref().update(updates);
+
+  document.getElementById("result").textContent =
+    "本編の詰め直し完了！バックアップも作成済みです。";
+}
+</script>
+
+</body>
+</html>
