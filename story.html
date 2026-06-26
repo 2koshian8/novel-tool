@@ -391,22 +391,20 @@ episodes.forEach(episode => {
 
 setNextWork("nextCoverCard", nextCover);
 
-function createNewEpisode() {
-  const mainEpisodes = episodes.filter(
-    episode => episode.id < 100
-  );
+async function createNewEpisode() {
+  const snapshot = await database.ref("episodes").once("value");
+  const firebaseEpisodes = snapshot.val() || {};
 
-  const nextId =
-    Math.max(
-      ...mainEpisodes.map(
-        episode => episode.id
-      )
-    ) + 1;
+  const ids = [
+    ...episodes.map(episode => Number(episode.id)),
+    ...Object.keys(firebaseEpisodes).map(id => Number(id))
+  ].filter(id => id < 100 && !isNaN(id));
+
+  const nextId = Math.max(...ids) + 1;
 
   console.log("新規作成ID:", nextId);
 
-  location.href =
-    "episode.html?id=" + nextId;
+  location.href = "episode.html?id=" + nextId;
 }
 
 </script>
