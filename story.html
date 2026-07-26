@@ -55,9 +55,7 @@
   XXV
 </div>
 
-    <div id="nextPostDays" class="schedule-days">
-      あと0日
-    </div>
+   
   </div>
 
   <div class="schedule-box">
@@ -69,9 +67,7 @@
   XXVI
 </div>
 
-    <div id="nextReserveDays" class="schedule-days">
-      あと0日
-    </div>
+
   </div>
 
 </div>
@@ -136,9 +132,6 @@ const database = firebase.database();
 </script>
 
 <script>
-const nextPostDate = new Date("2026-06-20");
-const today = new Date();
-
 const episodeList = document.getElementById("episodeList");
 
 let total = 0;
@@ -146,52 +139,102 @@ let posted = 0;
 let writing = 0;
 let notyet = 0;
 
-function renderEpisodes() {
+let firebaseEpisodesData = {};
+
+/* true・"true"の両方をチェック済みとして扱う */
+function isChecked(value) {
+  return value === true || value === "true";
+}
+
+/* Firebaseに値がなければ、以前のlocalStorageを予備として読む */
+function getEpisodeValue(episode, fieldName, localKey, defaultValue = "") {
+  const firebaseEpisode =
+    firebaseEpisodesData[String(episode.id)] ||
+    firebaseEpisodesData[episode.id] ||
+    {};
+
+  const firebaseValue = firebaseEpisode[fieldName];
+
+  if (firebaseValue !== null && firebaseValue !== undefined) {
+    return firebaseValue;
+  }
+
+  const localValue = localStorage.getItem(localKey);
+
+  if (localValue !== null) {
+    return localValue;
+  }
+
+  return defaultValue;
+}
+
+    function renderEpisodes() {
   episodeList.innerHTML = "";
 
-  total = 0;
-  posted = 0;
-  writing = 0;
-  notyet = 0;
+  let total = 0;
+  let posted = 0;
+  let writing = 0;
+  let notyet = 0;
 
   episodes.forEach(episode => {
-    const firebaseTitle =
-      localStorage.getItem("episode" + episode.id + "Title");
+    const finalText = String(
+      getEpisodeValue(
+        episode,
+        "FinalText",
+        "episode" + episode.id + "FinalText",
+        ""
+      )
+    );
 
-    if (firebaseTitle) {
-      episode.title = firebaseTitle;
-    }
+    const pixiv = isChecked(
+      getEpisodeValue(
+        episode,
+        "PixivCheck",
+        "episode" + episode.id + "-pixiv",
+        false
+      )
+    );
 
-    const finalText =
-      localStorage.getItem("episode" + episode.id + "FinalText") || "";
+    const reserve = isChecked(
+      getEpisodeValue(
+        episode,
+        "ReserveCheck",
+        "episode" + episode.id + "-reserve",
+        false
+      )
+    );
 
-    const pixiv =
-      localStorage.getItem("episode" + episode.id + "-pixiv");
+    const textDone = isChecked(
+      getEpisodeValue(
+        episode,
+        "TextCheck",
+        "episode" + episode.id + "-text",
+        false
+      )
+    );
 
-    const reserve =
-      localStorage.getItem("episode" + episode.id + "-reserve");
-
-    const textDone =
-      localStorage.getItem("episode" + episode.id + "-text");
-
-    const postDate =
-      localStorage.getItem("episode" + episode.id + "PostDate") || "";
+    const postDate = getEpisodeValue(
+      episode,
+      "PostDate",
+      "episode" + episode.id + "PostDate",
+      ""
+    );
 
     let statusText = "未着手";
     let statusClass = "not-started";
     let statusData = "notyet";
 
-    if (pixiv === "true") {
+    if (pixiv) {
       statusText = "投稿済み";
       statusClass = "posted";
       statusData = "done";
       posted++;
-    } else if (reserve === "true") {
+    } else if (reserve) {
       statusText = "予約済み";
       statusClass = "reserved";
       statusData = "writing";
       writing++;
-    } else if (textDone === "true") {
+    } else if (textDone) {
       statusText = "清書済み";
       statusClass = "clean";
       statusData = "writing";
@@ -203,6 +246,7 @@ function renderEpisodes() {
     total += finalText.length;
 
     const card = document.createElement("a");
+
     card.href = "episode.html?id=" + episode.id;
     card.className = "story-card";
     card.dataset.status = statusData;
@@ -236,91 +280,24 @@ function renderEpisodes() {
   document.getElementById("totalCount").textContent =
     total.toLocaleString() + "文字";
 
-  document.getElementById("postedCount").textContent = posted + "話";
-  document.getElementById("writingCount").textContent = writing + "話";
-  document.getElementById("notyetCount").textContent = notyet + "話";
-}
+  document.getElementById("postedCount").textContent =
+    posted + "話";
 
-database
-  .ref("episodes")
-  .once("value")
-  .then(snapshot => {
-    const firebaseEpisodes = snapshot.val();
+  document.getElementById("writingCount").textContent =
+    writing + "話";
 
-    if (firebaseEpisodes) {
-      Object.keys(firebaseEpisodes).forEach(id => {
-        const data = firebaseEpisodes[id];
-
-        const exists = episodes.some(
-          episode => episode.id == id
-        );
-
-        if (!exists && data.Title) {
-          episodes.push({
-            id: Number(id),
-            title: data.Title
-          });
-        }
-
-        if (data.Title) {
-          localStorage.setItem(
-            "episode" + id + "Title",
-            data.Title
-          );
-        }
-      });
-    }
-
-    episodes.sort((a, b) => a.id - b.id);
-
-    renderEpisodes();
-  });
-
-const diffDays = Math.ceil(
-  (nextPostDate - today) / (1000 * 60 * 60 * 24)
-);
-
-document.getElementById("nextPostDays").textContent =
-  "あと" + diffDays + "日";
-
-document.getElementById("nextReserveDays").textContent =
-  "あと" + diffDays + "日";
-
-let nextPost = null;
-let nextReserve = null;
-
-for (let i = 1; i <= episodes.length; i++) {
-
-  const isPosted =
-    localStorage.getItem("episode" + i + "-pixiv")
-    === "true";
-
-  if (!isPosted) {
-
-    nextPost = episodes[i - 1];
-
-    if (i < episodes.length) {
-      nextReserve = episodes[i];
-    }
-
-    break;
-  }
-}
-if (nextPost) {
-  document.getElementById("nextPostEpisode")
-    .textContent = nextPost.title;
-}
-
-if (nextReserve) {
-  document.getElementById("nextReserveEpisode")
-    .textContent = nextReserve.title;
+  document.getElementById("notyetCount").textContent =
+    notyet + "話";
 }
 
 function filterEpisodes(status) {
   const cards = document.querySelectorAll(".story-card");
 
   cards.forEach(card => {
-    if (status === "all" || card.dataset.status === status) {
+    if (
+      status === "all" ||
+      card.dataset.status === status
+    ) {
       card.style.display = "block";
     } else {
       card.style.display = "none";
@@ -328,42 +305,10 @@ function filterEpisodes(status) {
   });
 }
 
-let nextDraft = null;
-let nextClean = null;
-let nextFinal = null;
-
-episodes.forEach(episode => {
-  const draftText =
-    localStorage.getItem("episode" + episode.id + "DraftText") || "";
-
-  const cleanText =
-    localStorage.getItem("episode" + episode.id + "CleanText") || "";
-
-  const finalText =
-    localStorage.getItem("episode" + episode.id + "FinalText") || "";
-
-  const textDone =
-    localStorage.getItem("episode" + episode.id + "-text");
-
-  const pixiv =
-    localStorage.getItem("episode" + episode.id + "-pixiv");
-
-  if (!nextDraft && draftText.length === 0) {
-    nextDraft = episode;
-  }
-
-  if (!nextClean && draftText.length > 0 && cleanText.length === 0) {
-    nextClean = episode;
-  }
-
-  if (!nextFinal && cleanText.length > 0 && finalText.length === 0 && pixiv !== "true") {
-    nextFinal = episode;
-  }
-});
-
 function setNextWork(cardId, episode) {
   const card = document.getElementById(cardId);
-  const title = card.querySelector(".next-work-episode");
+  const title =
+    card.querySelector(".next-work-episode");
 
   if (episode) {
     title.textContent = episode.title;
@@ -374,39 +319,208 @@ function setNextWork(cardId, episode) {
   }
 }
 
-setNextWork("nextDraftCard", nextDraft);
-setNextWork("nextCleanCard", nextClean);
-setNextWork("nextFinalCard", nextFinal);
+function updateDashboard() {
+  let nextDraft = null;
+  let nextClean = null;
+  let nextFinal = null;
+  let nextCover = null;
 
-let nextCover = null;
+  episodes.forEach(episode => {
+    const draftText = String(
+      getEpisodeValue(
+        episode,
+        "DraftText",
+        "episode" + episode.id + "DraftText",
+        ""
+      )
+    );
 
-episodes.forEach(episode => {
-  const coverDone =
-    localStorage.getItem("episode" + episode.id + "-cover");
+    const cleanText = String(
+      getEpisodeValue(
+        episode,
+        "CleanText",
+        "episode" + episode.id + "CleanText",
+        ""
+      )
+    );
 
-  if (!nextCover && coverDone !== "true") {
-    nextCover = episode;
-  }
-});
+    const finalText = String(
+      getEpisodeValue(
+        episode,
+        "FinalText",
+        "episode" + episode.id + "FinalText",
+        ""
+      )
+    );
 
-setNextWork("nextCoverCard", nextCover);
+    const pixiv = isChecked(
+      getEpisodeValue(
+        episode,
+        "PixivCheck",
+        "episode" + episode.id + "-pixiv",
+        false
+      )
+    );
 
-async function createNewEpisode() {
-  const snapshot = await database.ref("episodes").once("value");
-  const firebaseEpisodes = snapshot.val() || {};
+    const coverDone = isChecked(
+      getEpisodeValue(
+        episode,
+        "CoverCheck",
+        "episode" + episode.id + "-cover",
+        false
+      )
+    );
 
-  const ids = [
-    ...episodes.map(episode => Number(episode.id)),
-    ...Object.keys(firebaseEpisodes).map(id => Number(id))
-  ].filter(id => id < 100 && !isNaN(id));
+    if (!nextDraft && draftText.length === 0) {
+      nextDraft = episode;
+    }
 
-  const nextId = Math.max(...ids) + 1;
+    if (
+      !nextClean &&
+      draftText.length > 0 &&
+      cleanText.length === 0
+    ) {
+      nextClean = episode;
+    }
 
-  console.log("新規作成ID:", nextId);
+    if (
+      !nextFinal &&
+      cleanText.length > 0 &&
+      finalText.length === 0 &&
+      !pixiv
+    ) {
+      nextFinal = episode;
+    }
 
-  location.href = "episode.html?id=" + nextId;
+    if (!nextCover && !coverDone) {
+      nextCover = episode;
+    }
+  });
+
+  setNextWork("nextDraftCard", nextDraft);
+  setNextWork("nextCleanCard", nextClean);
+  setNextWork("nextFinalCard", nextFinal);
+  setNextWork("nextCoverCard", nextCover);
+
+  const unpostedEpisodes = episodes.filter(episode => {
+    return !isChecked(
+      getEpisodeValue(
+        episode,
+        "PixivCheck",
+        "episode" + episode.id + "-pixiv",
+        false
+      )
+    );
+  });
+
+  const nextPost = unpostedEpisodes[0] || null;
+  const nextReserve = unpostedEpisodes[1] || null;
+
+ if (nextPost) {
+  document.getElementById("nextPostEpisode").textContent =
+    nextPost.title;
+} else {
+  document.getElementById("nextPostEpisode").textContent =
+    "なし";
 }
 
+if (nextReserve) {
+  document.getElementById("nextReserveEpisode").textContent =
+    nextReserve.title;
+} else {
+  document.getElementById("nextReserveEpisode").textContent =
+    "なし";
+}
+
+}
+
+async function createNewEpisode() {
+  try {
+    const ids = [
+      ...episodes.map(episode => Number(episode.id)),
+      ...Object.keys(firebaseEpisodesData).map(
+        id => Number(id)
+      )
+    ].filter(
+      id => id < 100 && !Number.isNaN(id)
+    );
+
+    const nextId =
+      ids.length > 0
+        ? Math.max(...ids) + 1
+        : 1;
+
+    console.log("新規作成ID:", nextId);
+
+    location.href =
+      "episode.html?id=" + nextId;
+  } catch (error) {
+    console.error(
+      "新規作成IDの取得に失敗しました:",
+      error
+    );
+
+    alert(
+      "新しい話数を作成できませんでした。"
+    );
+  }
+}
+
+async function loadStoryData() {
+  try {
+    const snapshot = await database
+      .ref("episodes")
+      .once("value");
+
+    firebaseEpisodesData =
+      snapshot.val() || {};
+
+    Object.keys(firebaseEpisodesData).forEach(id => {
+      const data =
+        firebaseEpisodesData[id] || {};
+
+      const exists = episodes.some(
+        episode => episode.id == id
+      );
+
+      if (!exists) {
+        episodes.push({
+          id: Number(id),
+          title:
+            data.Title ||
+            id + "話"
+        });
+      } else if (data.Title) {
+        const episode = episodes.find(
+          episode => episode.id == id
+        );
+
+        episode.title = data.Title;
+      }
+    });
+
+    episodes.sort(
+      (a, b) => Number(a.id) - Number(b.id)
+    );
+
+    renderEpisodes();
+    updateDashboard();
+
+    console.log(
+      "Firebaseから話数一覧を読み込みました"
+    );
+  } catch (error) {
+    console.error(
+      "Firebaseの読み込みに失敗しました:",
+      error
+    );
+
+    episodeList.innerHTML =
+      "<p>話数データを読み込めませんでした。</p>";
+  }
+}
+
+loadStoryData();
 </script>
 </body>
 </html>
